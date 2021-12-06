@@ -1,0 +1,85 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-arm64:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        sdk: [11]
+        toolset: [17.XX]
+        
+    name: Windows ARM64
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
+      - name: Build project
+        run: msbuild .\Source\dolphin-emu.sln /p:Configuration=Release
+      - name: Upload Release
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows-ARM64.zip
+          path: ./Binary/ARM64/
+          
+  build-amd64:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        sdk: [11]
+        toolset: [17.XX]
+        
+    name: Windows x64
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Build project
+        run: msbuild .\Source\dolphin-emu.sln /p:Configuration=Release
+      - name: Upload Release
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows-x64.zip
+          path: ./Binary/x64/
+          
+  #build:
+    #runs-on: windows-2022
+    #strategy:
+    #  matrix:
+    #    arch: [amd64, amd64_arm64]
+    #    sdk: [11]
+    #    toolset: [17.XX]
+    #    
+    #name: ${{ matrix.arch }}
+    #steps:
+    #  - uses: actions/checkout@v2
+    #    with:
+    #      submodules: recursive
+    #  - uses: ilammy/msvc-dev-cmd@v1
+    #    with:
+    #      arch: ${{ matrix.arch }}
+    #  - name: Build project
+    #    run: msbuild .\Source\dolphin-emu.sln /p:Configuration=Release
+    #  - name: Upload Release
+    #    uses: actions/upload-artifact@v2
+    #    with:
+    #      name: Windows-${{ matrix.arch }}.zip
+    #      path: ./Binary
