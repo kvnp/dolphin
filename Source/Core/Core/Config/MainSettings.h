@@ -215,4 +215,46 @@ extern const Info<bool> MAIN_GAMELIST_COLUMN_TAGS;
 
 extern const Info<bool> MAIN_FIFOPLAYER_LOOP_REPLAY;
 
+// Main.AutoUpdate
+
+extern const Info<std::string> MAIN_AUTOUPDATE_UPDATE_TRACK;
+extern const Info<std::string> MAIN_AUTOUPDATE_HASH_OVERRIDE;
+
+// Main.Movie
+
+extern const Info<bool> MAIN_MOVIE_PAUSE_MOVIE;
+extern const Info<std::string> MAIN_MOVIE_MOVIE_AUTHOR;
+extern const Info<bool> MAIN_MOVIE_DUMP_FRAMES;
+extern const Info<bool> MAIN_MOVIE_DUMP_FRAMES_SILENT;
+extern const Info<bool> MAIN_MOVIE_SHOW_INPUT_DISPLAY;
+extern const Info<bool> MAIN_MOVIE_SHOW_RTC;
+extern const Info<bool> MAIN_MOVIE_SHOW_RERECORD;
+
+// Main.Input
+
+extern const Info<bool> MAIN_INPUT_BACKGROUND_INPUT;
+
+// Main.Debug
+
+extern const Info<bool> MAIN_DEBUG_JIT_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_LXZ_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_LWZ_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_LBZX_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_FLOATING_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_PAIRED_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_FLOATING_POINT_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_INTEGER_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_PAIRED_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_SYSTEM_REGISTERS_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_BRANCH_OFF;
+extern const Info<bool> MAIN_DEBUG_JIT_REGISTER_CACHE_OFF;
+
+// Main.BluetoothPassthrough
+
+extern const Info<bool> MAIN_BLUETOOTH_PASSTHROUGH_ENABLED;
+extern const Info<int> MAIN_BLUETOOTH_PASSTHROUGH_VID;
+extern const Info<int> MAIN_BLUETOOTH_PASSTHROUGH_PID;
+extern const Info<std::string> MAIN_BLUETOOTH_PASSTHROUGH_LINK_KEYS;
+
 }  // namespace Config

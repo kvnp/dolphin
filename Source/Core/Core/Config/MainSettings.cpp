@@ -7,6 +7,7 @@
 
 #include "AudioCommon/AudioCommon.h"
 #include "Common/Config/Config.h"
+#include "Common/Version.h"
 #include "Core/Config/DefaultLocale.h"
 #include "Core/HW/EXI/EXI_Device.h"
 #include "Core/HW/Memmap.h"
@@ -251,5 +252,59 @@ const Info<bool> MAIN_GAMELIST_COLUMN_TAGS{{System::Main, "GameList", "ColumnTag
 // Main.FifoPlayer
 
 const Info<bool> MAIN_FIFOPLAYER_LOOP_REPLAY{{System::Main, "FifoPlayer", "LoopReplay"}, true};
+
+// Main.AutoUpdate
+
+const Info<std::string> MAIN_AUTOUPDATE_UPDATE_TRACK{{System::Main, "AutoUpdate", "UpdateTrack"},
+                                                     Common::scm_update_track_str};
+const Info<std::string> MAIN_AUTOUPDATE_HASH_OVERRIDE{{System::Main, "AutoUpdate", "HashOverride"},
+                                                      ""};
+
+// Main.Movie
+
+const Info<bool> MAIN_MOVIE_PAUSE_MOVIE{{System::Main, "Movie", "PauseMovie"}, false};
+const Info<std::string> MAIN_MOVIE_MOVIE_AUTHOR{{System::Main, "Movie", "Author"}, ""};
+const Info<bool> MAIN_MOVIE_DUMP_FRAMES{{System::Main, "Movie", "DumpFrames"}, false};
+const Info<bool> MAIN_MOVIE_DUMP_FRAMES_SILENT{{System::Main, "Movie", "DumpFramesSilent"}, false};
+const Info<bool> MAIN_MOVIE_SHOW_INPUT_DISPLAY{{System::Main, "Movie", "ShowInputDisplay"}, false};
+const Info<bool> MAIN_MOVIE_SHOW_RTC{{System::Main, "Movie", "ShowRTC"}, false};
+const Info<bool> MAIN_MOVIE_SHOW_RERECORD{{System::Main, "Movie", "ShowRerecord"}, false};
+
+// Main.Input
+
+const Info<bool> MAIN_INPUT_BACKGROUND_INPUT{{System::Main, "Input", "BackgroundInput"}, false};
+
+// Main.Debug
+
+const Info<bool> MAIN_DEBUG_JIT_OFF{{System::Main, "Debug", "JitOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_OFF{{System::Main, "Debug", "JitLoadStoreOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_LXZ_OFF{{System::Main, "Debug", "JitLoadStorelXzOff"},
+                                                   false};
+const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_LWZ_OFF{{System::Main, "Debug", "JitLoadStorelwzOff"},
+                                                   false};
+const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_LBZX_OFF{{System::Main, "Debug", "JitLoadStorelbzxOff"},
+                                                    false};
+const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_FLOATING_OFF{
+    {System::Main, "Debug", "JitLoadStoreFloatingOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_LOAD_STORE_PAIRED_OFF{
+    {System::Main, "Debug", "JitLoadStorePairedOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_FLOATING_POINT_OFF{{System::Main, "Debug", "JitFloatingPointOff"},
+                                                   false};
+const Info<bool> MAIN_DEBUG_JIT_INTEGER_OFF{{System::Main, "Debug", "JitIntegerOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_PAIRED_OFF{{System::Main, "Debug", "JitPairedOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_SYSTEM_REGISTERS_OFF{
+    {System::Main, "Debug", "JitSystemRegistersOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_BRANCH_OFF{{System::Main, "Debug", "JitBranchOff"}, false};
+const Info<bool> MAIN_DEBUG_JIT_REGISTER_CACHE_OFF{{System::Main, "Debug", "JitRegisterCacheOff"},
+                                                   false};
+
+// Main.BluetoothPassthrough
+
+const Info<bool> MAIN_BLUETOOTH_PASSTHROUGH_ENABLED{
+    {System::Main, "BluetoothPassthrough", "Enabled"}, false};
+const Info<int> MAIN_BLUETOOTH_PASSTHROUGH_VID{{System::Main, "BluetoothPassthrough", "VID"}, -1};
+const Info<int> MAIN_BLUETOOTH_PASSTHROUGH_PID{{System::Main, "BluetoothPassthrough", "PID"}, -1};
+const Info<std::string> MAIN_BLUETOOTH_PASSTHROUGH_LINK_KEYS{
+    {System::Main, "BluetoothPassthrough", "LinkKeys"}, ""};
 
 }  // namespace Config
