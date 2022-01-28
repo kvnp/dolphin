@@ -22,11 +22,11 @@ namespace fs = std::filesystem;
 
 #include "Common/Align.h"
 #include "Common/CDUtils.h"
-#include "Common/CRC32.h"
 #include "Common/CommonPaths.h"
 #include "Common/CommonTypes.h"
 #include "Common/Config/Config.h"
 #include "Common/FileUtil.h"
+#include "Common/Hash.h"
 #include "Common/IOFile.h"
 #include "Common/Logging/Log.h"
 #include "Common/MsgHandler.h"
@@ -205,7 +205,7 @@ std::unique_ptr<BootParameters> BootParameters::GenerateFromFile(std::vector<std
   std::string folder_path;
   std::string extension;
   SplitPath(paths.front(), &folder_path, nullptr, &extension);
-  std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+  Common::ToLower(&extension);
 
   if (extension == ".m3u" || extension == ".m3u8")
   {
@@ -214,7 +214,7 @@ std::unique_ptr<BootParameters> BootParameters::GenerateFromFile(std::vector<std
       return {};
 
     SplitPath(paths.front(), nullptr, nullptr, &extension);
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    Common::ToLower(&extension);
   }
 
   std::string path = paths.front();
@@ -226,7 +226,7 @@ std::unique_ptr<BootParameters> BootParameters::GenerateFromFile(std::vector<std
   {
     const std::string display_name = GetAndroidContentDisplayName(path);
     SplitPath(display_name, nullptr, nullptr, &extension);
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    Common::ToLower(&extension);
   }
 #endif
 

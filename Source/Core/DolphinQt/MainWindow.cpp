@@ -206,7 +206,7 @@ MainWindow::MainWindow(std::unique_ptr<BootParameters> boot_parameters,
                        const std::string& movie_path)
     : QMainWindow(nullptr)
 {
-  setWindowTitle(QString::fromStdString(Common::scm_rev_str));
+  setWindowTitle(QString::fromStdString(Common::GetScmRevStr()));
   setWindowIcon(Resources::GetAppIcon());
   setUnifiedTitleAndToolBarOnMac(true);
   setAcceptDrops(true);
@@ -861,7 +861,7 @@ bool MainWindow::RequestStop()
   else
     FullScreen();
 
-  if (SConfig::GetInstance().bConfirmStop)
+  if (Config::Get(Config::MAIN_CONFIRM_ON_STOP))
   {
     if (std::exchange(m_stop_confirm_showing, true))
       return true;
@@ -1145,7 +1145,7 @@ void MainWindow::HideRenderWidget(bool reinit, bool is_exit)
     m_rendering_to_main = false;
     m_stack->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     disconnect(Host::GetInstance(), &Host::RequestTitle, this, &MainWindow::setWindowTitle);
-    setWindowTitle(QString::fromStdString(Common::scm_rev_str));
+    setWindowTitle(QString::fromStdString(Common::GetScmRevStr()));
   }
 
   // The following code works around a driver bug that would lead to Dolphin crashing when changing
@@ -1728,9 +1728,10 @@ void MainWindow::OnStartRecording()
 
   for (int i = 0; i < 4; i++)
   {
-    if (SConfig::GetInstance().m_SIDevice[i] == SerialInterface::SIDEVICE_GC_GBA_EMULATED)
+    const SerialInterface::SIDevices si_device = Config::Get(Config::GetInfoForSIDevice(i));
+    if (si_device == SerialInterface::SIDEVICE_GC_GBA_EMULATED)
       controllers[i] = Movie::ControllerType::GBA;
-    else if (SerialInterface::SIDevice_IsGCController(SConfig::GetInstance().m_SIDevice[i]))
+    else if (SerialInterface::SIDevice_IsGCController(si_device))
       controllers[i] = Movie::ControllerType::GC;
     else
       controllers[i] = Movie::ControllerType::None;
@@ -1782,8 +1783,9 @@ void MainWindow::ShowTASInput()
 {
   for (int i = 0; i < num_gc_controllers; i++)
   {
-    if (SConfig::GetInstance().m_SIDevice[i] != SerialInterface::SIDEVICE_NONE &&
-        SConfig::GetInstance().m_SIDevice[i] != SerialInterface::SIDEVICE_GC_GBA)
+    const auto si_device = Config::Get(Config::GetInfoForSIDevice(i));
+    if (si_device != SerialInterface::SIDEVICE_NONE &&
+        si_device != SerialInterface::SIDEVICE_GC_GBA)
     {
       m_gc_tas_input_windows[i]->show();
       m_gc_tas_input_windows[i]->raise();

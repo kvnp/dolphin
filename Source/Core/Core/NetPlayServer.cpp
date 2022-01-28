@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cinttypes>
 #include <cstddef>
 #include <cstdio>
 #include <memory>
@@ -41,6 +40,8 @@
 #include "Core/ConfigManager.h"
 #include "Core/GeckoCode.h"
 #include "Core/GeckoCodeConfig.h"
+#include "Core/HW/EXI/EXI.h"
+#include "Core/HW/EXI/EXI_Device.h"
 #ifdef HAS_LIBMGBA
 #include "Core/HW/GBACore.h"
 #endif
@@ -394,7 +395,7 @@ ConnectionError NetPlayServer::OnConnect(ENetPeer* socket, sf::Packet& rpac)
   std::string npver;
   rpac >> npver;
   // Dolphin netplay version
-  if (npver != Common::scm_rev_git_str)
+  if (npver != Common::GetScmRevGitStr())
     return ConnectionError::VersionMismatch;
 
   // game is currently running or game start is pending
@@ -414,6 +415,9 @@ ConnectionError NetPlayServer::OnConnect(ENetPeer* socket, sf::Packet& rpac)
 
   if (StringUTF8CodePointCount(player.name) > MAX_NAME_LENGTH)
     return ConnectionError::NameTooLong;
+
+  // Extend reliable traffic timeout
+  enet_peer_timeout(socket, 0, 30000, 30000);
 
   // cause pings to be updated
   m_update_pings = true;
@@ -733,7 +737,7 @@ unsigned int NetPlayServer::OnData(sf::Packet& packet, Client& player)
   MessageID mid;
   packet >> mid;
 
-  INFO_LOG_FMT(NETPLAY, "Got client message: {:x}", mid);
+  INFO_LOG_FMT(NETPLAY, "Got client message: {:x}", static_cast<u8>(mid));
 
   // don't need lock because this is the only thread that modifies the players
   // only need locks for writes to m_players in this thread
@@ -1142,7 +1146,7 @@ unsigned int NetPlayServer::OnData(sf::Packet& packet, Client& player)
     default:
       PanicAlertFmtT(
           "Unknown SYNC_SAVE_DATA message with id:{0} received from player:{1} Kicking player!",
-          sub_id, player.pid);
+          static_cast<u8>(sub_id), player.pid);
       return 1;
     }
   }
@@ -1184,15 +1188,15 @@ unsigned int NetPlayServer::OnData(sf::Packet& packet, Client& player)
     default:
       PanicAlertFmtT(
           "Unknown SYNC_GECKO_CODES message with id:{0} received from player:{1} Kicking player!",
-          sub_id, player.pid);
+          static_cast<u8>(sub_id), player.pid);
       return 1;
     }
   }
   break;
 
   default:
-    PanicAlertFmtT("Unknown message with id:{0} received from player:{1} Kicking player!", mid,
-                   player.pid);
+    PanicAlertFmtT("Unknown message with id:{0} received from player:{1} Kicking player!",
+                   static_cast<u8>(mid), player.pid);
     // unknown message, kick the client
     return 1;
   }
@@ -1304,12 +1308,21 @@ bool NetPlayServer::SetupNetSettings()
   settings.m_CopyWiiSave = Config::Get(Config::NETPLAY_LOAD_WII_SAVE);
   settings.m_OCEnable = Config::Get(Config::MAIN_OVERCLOCK_ENABLE);
   settings.m_OCFactor = Config::Get(Config::MAIN_OVERCLOCK);
-  settings.m_EXIDevice[0] =
-      static_cast<ExpansionInterface::TEXIDevices>(Config::Get(Config::MAIN_SLOT_A));
-  settings.m_EXIDevice[1] =
-      static_cast<ExpansionInterface::TEXIDevices>(Config::Get(Config::MAIN_SLOT_B));
-  // There's no way the BBA is going to sync, disable it
-  settings.m_EXIDevice[2] = ExpansionInterface::EXIDEVICE_NONE;
+
+  for (ExpansionInterface::Slot slot : ExpansionInterface::SLOTS)
+  {
+    ExpansionInterface::EXIDeviceType device;
+    if (slot == ExpansionInterface::Slot::SP1)
+    {
+      // There's no way the BBA is going to sync, disable it
+      device = ExpansionInterface::EXIDeviceType::None;
+    }
+    else
+    {
+      device = Config::Get(Config::GetInfoForEXIDevice(slot));
+    }
+    settings.m_EXIDevice[slot] = device;
+  }
 
   for (size_t i = 0; i < Config::SYSCONF_SETTINGS.size(); ++i)
   {
@@ -1494,8 +1507,8 @@ bool NetPlayServer::StartGame()
   spac << m_settings.m_OCEnable;
   spac << m_settings.m_OCFactor;
 
-  for (auto& device : m_settings.m_EXIDevice)
-    spac << device;
+  for (auto slot : ExpansionInterface::SLOTS)
+    spac << static_cast<int>(m_settings.m_EXIDevice[slot]);
 
   for (u32 value : m_settings.m_SYSCONFSettings)
     spac << value;
@@ -1592,11 +1605,11 @@ bool NetPlayServer::SyncSaveData()
 
   u8 save_count = 0;
 
-  constexpr size_t exi_device_count = 2;
-  for (size_t i = 0; i < exi_device_count; i++)
+  for (ExpansionInterface::Slot slot : ExpansionInterface::MEMCARD_SLOTS)
   {
-    if (m_settings.m_EXIDevice[i] == ExpansionInterface::EXIDEVICE_MEMORYCARD ||
-        SConfig::GetInstance().m_EXIDevice[i] == ExpansionInterface::EXIDEVICE_MEMORYCARDFOLDER)
+    if (m_settings.m_EXIDevice[slot] == ExpansionInterface::EXIDeviceType::MemoryCard ||
+        Config::Get(Config::GetInfoForEXIDevice(slot)) ==
+            ExpansionInterface::EXIDeviceType::MemoryCardFolder)
     {
       save_count++;
     }
@@ -1651,16 +1664,15 @@ bool NetPlayServer::SyncSaveData()
   const std::string region =
       SConfig::GetDirectoryForRegion(SConfig::ToGameCubeRegion(game->GetRegion()));
 
-  for (size_t i = 0; i < exi_device_count; i++)
+  for (ExpansionInterface::Slot slot : ExpansionInterface::MEMCARD_SLOTS)
   {
-    const bool is_slot_a = i == 0;
+    const bool is_slot_a = slot == ExpansionInterface::Slot::A;
 
-    if (m_settings.m_EXIDevice[i] == ExpansionInterface::EXIDEVICE_MEMORYCARD)
+    if (m_settings.m_EXIDevice[slot] == ExpansionInterface::EXIDeviceType::MemoryCard)
     {
-      std::string path = is_slot_a ? Config::Get(Config::MAIN_MEMCARD_A_PATH) :
-                                     Config::Get(Config::MAIN_MEMCARD_B_PATH);
+      std::string path = Config::Get(Config::GetInfoForMemcardPath(slot));
 
-      MemoryCard::CheckPath(path, region, is_slot_a);
+      MemoryCard::CheckPath(path, region, slot);
 
       int size_override;
       IniFile gameIni = SConfig::LoadGameIni(game->GetGameID(), game->GetRevision());
@@ -1692,8 +1704,8 @@ bool NetPlayServer::SyncSaveData()
       SendChunkedToClients(std::move(pac), 1,
                            fmt::format("Memory Card {} Synchronization", is_slot_a ? 'A' : 'B'));
     }
-    else if (SConfig::GetInstance().m_EXIDevice[i] ==
-             ExpansionInterface::EXIDEVICE_MEMORYCARDFOLDER)
+    else if (Config::Get(Config::GetInfoForEXIDevice(slot)) ==
+             ExpansionInterface::EXIDeviceType::MemoryCardFolder)
     {
       const std::string path = File::GetUserPath(D_GCUSER_IDX) + region + DIR_SEP +
                                fmt::format("Card {}", is_slot_a ? 'A' : 'B');
@@ -2028,10 +2040,8 @@ void NetPlayServer::CheckSyncAndStartGame()
 
 u64 NetPlayServer::GetInitialNetPlayRTC() const
 {
-  const auto& config = SConfig::GetInstance();
-
-  if (config.bEnableCustomRTC)
-    return config.m_customRTCValue;
+  if (Config::Get(Config::MAIN_CUSTOM_RTC_ENABLE))
+    return Config::Get(Config::MAIN_CUSTOM_RTC_VALUE);
 
   return Common::Timer::GetLocalTimeSinceJan1970();
 }

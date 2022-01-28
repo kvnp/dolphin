@@ -363,7 +363,7 @@ bool ProgramShaderCache::CheckShaderCompileResult(GLuint id, GLenum type, std::s
       File::OpenFStream(file, filename, std::ios_base::out);
       file << s_glsl_header << code << info_log;
       file << "\n";
-      file << "Dolphin Version: " + Common::scm_rev_str + "\n";
+      file << "Dolphin Version: " + Common::GetScmRevStr() + "\n";
       file << "Video Backend: " + g_video_backend->GetDisplayName();
       file.close();
 
@@ -408,7 +408,7 @@ bool ProgramShaderCache::CheckProgramLinkResult(GLuint id, std::string_view vcod
 
       file << info_log;
       file << "\n";
-      file << "Dolphin Version: " + Common::scm_rev_str + "\n";
+      file << "Dolphin Version: " + Common::GetScmRevStr() + "\n";
       file << "Video Backend: " + g_video_backend->GetDisplayName();
       file.close();
 
@@ -838,7 +838,7 @@ void ProgramShaderCache::CreateHeader()
       (is_glsles && g_ActiveConfig.backend_info.bSupportsPaletteConversion) ?
           "precision highp usamplerBuffer;" :
           "",
-      v > GlslEs300 ? "precision highp sampler2DMS;" : "",
+      v > GlslEs300 ? "precision highp sampler2DMSArray;" : "",
       v >= GlslEs310 ? "precision highp image2DArray;" : "");
 }
 

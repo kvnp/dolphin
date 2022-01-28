@@ -758,15 +758,15 @@ void MenuBar::AddMovieMenu()
 
   auto* lag_counter = movie_menu->addAction(tr("Show Lag Counter"));
   lag_counter->setCheckable(true);
-  lag_counter->setChecked(SConfig::GetInstance().m_ShowLag);
+  lag_counter->setChecked(Config::Get(Config::MAIN_SHOW_LAG));
   connect(lag_counter, &QAction::toggled,
-          [](bool value) { SConfig::GetInstance().m_ShowLag = value; });
+          [](bool value) { Config::SetBaseOrCurrent(Config::MAIN_SHOW_LAG, value); });
 
   auto* frame_counter = movie_menu->addAction(tr("Show Frame Counter"));
   frame_counter->setCheckable(true);
-  frame_counter->setChecked(SConfig::GetInstance().m_ShowFrameCount);
+  frame_counter->setChecked(Config::Get(Config::MAIN_SHOW_FRAME_COUNT));
   connect(frame_counter, &QAction::toggled,
-          [](bool value) { SConfig::GetInstance().m_ShowFrameCount = value; });
+          [](bool value) { Config::SetBaseOrCurrent(Config::MAIN_SHOW_FRAME_COUNT, value); });
 
   auto* input_display = movie_menu->addAction(tr("Show Input Display"));
   input_display->setCheckable(true);
@@ -802,7 +802,7 @@ void MenuBar::AddJITMenu()
 
   m_jit_interpreter_core = m_jit->addAction(tr("Interpreter Core"));
   m_jit_interpreter_core->setCheckable(true);
-  m_jit_interpreter_core->setChecked(SConfig::GetInstance().cpu_core ==
+  m_jit_interpreter_core->setChecked(Config::Get(Config::MAIN_CPU_CORE) ==
                                      PowerPC::CPUCore::Interpreter);
 
   connect(m_jit_interpreter_core, &QAction::toggled, [](bool enabled) {
@@ -829,9 +829,9 @@ void MenuBar::AddJITMenu()
 
   m_jit_disable_fastmem = m_jit->addAction(tr("Disable Fastmem"));
   m_jit_disable_fastmem->setCheckable(true);
-  m_jit_disable_fastmem->setChecked(!SConfig::GetInstance().bFastmem);
+  m_jit_disable_fastmem->setChecked(!Config::Get(Config::MAIN_FASTMEM));
   connect(m_jit_disable_fastmem, &QAction::toggled, [this](bool enabled) {
-    SConfig::GetInstance().bFastmem = !enabled;
+    Config::SetBaseOrCurrent(Config::MAIN_FASTMEM, !enabled);
     ClearCache();
   });
 

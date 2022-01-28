@@ -126,6 +126,14 @@ protected:
   bool bJITSystemRegistersOff = false;
   bool bJITBranchOff = false;
   bool bJITRegisterCacheOff = false;
+  bool m_enable_debugging = false;
+  bool m_enable_float_exceptions = false;
+  bool m_enable_div_by_zero_exceptions = false;
+  bool m_low_dcbz_hack = false;
+  bool m_fprf = false;
+  bool m_accurate_nans = false;
+  bool m_fastmem_enabled = false;
+  bool m_mmu_enabled = false;
 
   void RefreshConfig();
 
@@ -138,6 +146,8 @@ protected:
 public:
   JitBase();
   ~JitBase() override;
+
+  bool IsDebuggingEnabled() const { return m_enable_debugging; }
 
   static const u8* Dispatch(JitBase& jit);
   virtual JitBaseBlockCache* GetBlockCache() = 0;
