@@ -102,6 +102,7 @@ struct VideoConfig final
   bool bDumpFramesAsImages = false;
   bool bUseFFV1 = false;
   std::string sDumpCodec;
+  std::string sDumpPixelFormat;
   std::string sDumpEncoder;
   std::string sDumpFormat;
   std::string sDumpPath;
@@ -152,8 +153,6 @@ struct VideoConfig final
   // VideoSW Debugging
   int drawStart = 0;
   int drawEnd = 0;
-  bool bZComploc = false;
-  bool bZFreeze = false;
   bool bDumpObjects = false;
   bool bDumpTevStages = false;
   bool bDumpTevTextureFetches = false;
